@@ -18,6 +18,7 @@ public class Controleur {
         private int de1;
         private int de2;
         private Observateur observateur;
+        private int nbdoubles;
         
         
         public Controleur() {
@@ -27,35 +28,35 @@ public class Controleur {
             this.de1 = 0;
             this.de2 = 0;
             ihmJoueurs.afficher();
+            this.nbdoubles = 0;
         }
         
         
         
 
-	public void jouerUnCoup(Joueur aJ) {
+	public boolean jouerUnCoup(Joueur aJ, Carreau c) {
             
             Message message = new Message();
             String choix;
-            int nbdoubles = 0;
-            Carreau c = this.lancerDesAvancer(aJ);
             
             
             
-            while(de1 == de2){
-                lancerDesAvancer(aJ);
-                if (nbdoubles == 2){
-                    aJ.setCarreau(monopoly.getCarreau(11));
-                }
-                nbdoubles++;
-            }
+            
+            
+            
             
             this.etatPartie("Info", aJ, c);
             
             if (c instanceof Gare){
                Joueur jProprio = ((Gare) c).getProprietaire();
                if (jProprio == null){
-                   choix = this.etatPartie("ChoixPayer", aJ, c);
-                   message = ((Gare) c).action(aJ,(this.de1 + this.de2), choix); //si y , message.type = ACHAT, sinon message.type = PASSER
+                   if( aJ.getCash() < ((Gare) c).getPrixAchat() ) { //pas assez d'argent
+                       choix = this.etatPartie("PasAssezArgent", aJ, c);
+                       message.type = Message.Types.PASASSEZARGENT;
+                   } else { //assez d'argent
+                        choix = this.etatPartie("ChoixPayer", aJ, c);
+                        message = ((Gare) c).action(aJ,(this.de1 + this.de2), choix); //si y , message.type = ACHAT, sinon message.type = PASSER
+                   }
                }
                if (jProprio != null && jProprio != aJ) {
                    int l = ((Gare) c).calculLoyer(0);
@@ -67,8 +68,13 @@ public class Controleur {
             if (c instanceof Compagnie){
                Joueur jProprio = ((Compagnie) c).getProprietaire();
                if (jProprio == null){
-                   choix = this.etatPartie("ChoixPayer", aJ, c);
-                   message = ((Compagnie) c).action(aJ,(this.de1 + this.de2), choix);
+                   if( aJ.getCash() < ((Compagnie) c).getPrixAchat() ) { //pas assez d'argent
+                       choix = this.etatPartie("PasAssezArgent", aJ, c);
+                       message.type = Message.Types.PASASSEZARGENT;
+                   } else { //assez d'argent
+                        choix = this.etatPartie("ChoixPayer", aJ, c);
+                        message = ((Compagnie) c).action(aJ,(this.de1 + this.de2), choix); //si y , message.type = ACHAT, sinon message.type = PASSER
+                   }
                }
                if (jProprio != null && jProprio != aJ) {
                    int l = ((Compagnie) c).calculLoyer(0);
@@ -80,8 +86,13 @@ public class Controleur {
             if (c instanceof ProprieteAConstruire){
                Joueur jProprio = ((ProprieteAConstruire) c).getProprietaire();
                if (jProprio == null){
-                   choix = this.etatPartie("ChoixPayer", aJ, c);
-                   message = ((ProprieteAConstruire) c).action(aJ,(this.de1 + this.de2), choix);
+                   if( aJ.getCash() < ((ProprieteAConstruire) c).getPrixAchat() ) { //pas assez d'argent
+                       choix = this.etatPartie("PasAssezArgent", aJ, c);
+                       message.type = Message.Types.PASASSEZARGENT;
+                   } else { //assez d'argent
+                        choix = this.etatPartie("ChoixPayer", aJ, c);
+                        message = ((ProprieteAConstruire) c).action(aJ,(this.de1 + this.de2), choix); //si y , message.type = ACHAT, sinon message.type = PASSER
+                   }
                }
                
                if (jProprio != null && !jProprio.getNom().equals(aJ.getNom())) {
@@ -93,8 +104,9 @@ public class Controleur {
                if (jProprio != null && jProprio.getNom().equals(aJ.getNom())){
                    this.etatPartie("ChoixMaison", aJ, c);
                }
-               
             }
+            
+            
             if (c instanceof Chance){
                 ((Chance) c).tirerCarte();
                 choix = null;
@@ -147,62 +159,93 @@ public class Controleur {
                         break;
                 };
             }
-      
             
-
-	}
+            if (de1 == de2){
+                if (nbdoubles == 2){
+                    aJ.setCarreau(monopoly.getCarreau(11));
+                    return false;
+                }else{
+                    nbdoubles++;
+                    return true;
+                }    
+            }
+        return false;    
+        }
         
         public Joueur joueurSuivant(HashMap<Integer, Joueur> joueursRestant, Joueur jCourant){
             int compteur = 0;
-            for (HashMap.Entry<Integer,Joueur> e : joueursRestant.entrySet()) {
+            for (HashMap.Entry<Integer,Joueur> e : joueursRestant.entrySet()){
                 if (jCourant == e.getValue()){
+                    if (jCourant.getCash() <= 0){
+                        supprimerJoueur(joueursRestant, jCourant);
+                    }
                     break;
                 }else{
                     compteur++;
                 }
             }
-            
-            return(joueursRestant.get((compteur + 1) % joueursRestant.size()));
-            
+            return (joueursRestant.get((compteur + 1) % joueursRestant.size()));
+        
+        
         }        
         
-
-        
-        public void jouerPlusieursTours(HashMap<Integer, Joueur> joueurs){
+        public void supprimerJoueur(HashMap<Integer, Joueur> joueursRestant, Joueur joueurPerdant){
             
-            int numJoueurGagnant=0;
-            int nbJoueurs = joueurs.size();
-            while (joueurs.size()>1) {
-                Iterator<Map.Entry<Integer,Joueur>> iter = joueurs.entrySet().iterator();
-                while (iter.hasNext()){          
+            Iterator<Map.Entry<Integer,Joueur>> iter = joueursRestant.entrySet().iterator();
+            while (iter.hasNext()){ 
                     Map.Entry<Integer, Joueur> entry = iter.next();
-                   
-                    if (nbJoueurs == 1){
-                        numJoueurGagnant = entry.getKey();
+                    if (joueurPerdant == entry.getValue()){
+                            entry.getValue().reinitProprietes();
+                            iter.remove();
+                            this.etatPartie("SupprimerJoueur", joueurPerdant, null);                     
                         break;
                     }
-                    Integer i = entry.getKey();
-                    Joueur j = entry.getValue();
-                    jouerUnCoup(j);
-                    //observateur.notify(de1, de2)
-                    if (entry.getValue().getCash() <= 0) {
-                        entry.getValue().reinitProprietes();
-                        iter.remove();
-                        nbJoueurs = nbJoueurs - 1;
-                        getIhmJeu().joueurSupprime(entry.getValue().getNom());
+                    if (joueursRestant.size() == 1){
+                            for (HashMap.Entry<Integer,Joueur> e : joueursRestant.entrySet()){
+                                if(e!=null){
+                                    this.etatPartie("JoueurGagne", e.getValue() , null);  
+                                }
+                            }       
                     }
-
-
-
-                    while (de1 == de2){
-                        jouerUnCoup(j);
-                    }
-                    
-                }
+                            
             }
-            
-            getIhmJeu().joueurAGagne(joueurs.get(numJoueurGagnant).getNom());
         }
+        
+//        public void jouerPlusieursTours(HashMap<Integer, Joueur> joueurs){
+//            
+//            int numJoueurGagnant=0;
+//            int nbJoueurs = joueurs.size();
+//            while (joueurs.size()>1) {
+//                Iterator<Map.Entry<Integer,Joueur>> iter = joueurs.entrySet().iterator();
+//                while (iter.hasNext()){          
+//                    Map.Entry<Integer, Joueur> entry = iter.next();
+//                   
+//                    if (nbJoueurs == 1){
+//                        numJoueurGagnant = entry.getKey();
+//                        break;
+//                    }
+//                    Integer i = entry.getKey();
+//                    Joueur j = entry.getValue();
+//                    jouerUnCoup(j);
+//                    //observateur.notify(de1, de2)
+//                    if (entry.getValue().getCash() <= 0) {
+//                        entry.getValue().reinitProprietes();
+//                        iter.remove();
+//                        nbJoueurs = nbJoueurs - 1;
+//                        getIhmJeu().joueurSupprime(entry.getValue().getNom());
+//                    }
+//
+//
+//
+//                    while (de1 == de2){
+//                        jouerUnCoup(j);
+//                    }
+//                    
+//                }
+//            }
+//            
+//           getIhmJeu().joueurAGagne(joueurs.get(numJoueurGagnant).getNom());
+//        }
         
         
         public String etatPartie(String etat, Joueur aJ, Carreau c){
@@ -223,6 +266,54 @@ public class Controleur {
                 case "Passer":
                         getIhmJeu().passer();
                     break; 
+                case "SupprimerJoueur":
+                        getIhmJeu().joueurSupprime(aJ.getNom());
+                    break;
+                case "JoueurGagne" :
+                        getIhmJeu().joueurAGagne(aJ.getNom());
+                case "PasAssezArgent":
+                        getIhmJeu().pasArgent();
+                case "Carte Allez Prison" :
+                        getIhmJeu().carteAllezPrison();
+                    break;
+                case "Carte Depart" :
+                        getIhmJeu().carteDepart();
+                    break;
+                case "Carte Avenue Henri-Martin" :
+                        getIhmJeu().carteAvenueHenriMartin();
+                    break;
+                case "Carte Gare de Lyon" :
+                        getIhmJeu().carteGareDeLyon();
+                    break;
+                case "Carte Boulevard de la Vilette" :
+                        getIhmJeu().carteBoulevardDeLaVilette();
+                    break;
+                case "Carte Rue de la Paix" :
+                        getIhmJeu().carteRueDeLaPaix();
+                    break;
+                case "Carte Amende" :
+                        //getIhmJeu().carteAmende();
+                    break;
+                case "Carte Gain" :
+                        //getIhmJeu().carteGain();
+                    break;
+                case "Carte Libere" :
+                        getIhmJeu().carteLibere();
+                    break;
+                case "Carte Maison Hotel" :
+                        //getIhmJeu().carteMaisonHotel();
+                    break;
+                case "Carte Reculer" :
+                        getIhmJeu().carteReculer();
+                    break;
+                case "Carte Belleville" :
+                        getIhmJeu().carteBelleville();
+                    break;
+                case "Carte Anniversaire" :
+                        getIhmJeu().carteAnniversaire();
+                    break;
+                    
+
                 
             }
             return str;
@@ -232,8 +323,6 @@ public class Controleur {
 	public Carreau lancerDesAvancer(Joueur aJ) {
 
                        int d = lancerDes();
-
-                
                 Carreau cCour = aJ.getPosCourante();
                 cCour = setNouveauCarreau(d, cCour);
                 aJ.setCarreau(cCour);

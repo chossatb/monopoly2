@@ -61,6 +61,9 @@ public class Joueur {
         
         public void diminuerCash(int val){
             this.cash = this.cash - val;
+            if(this.cash<0){
+                this.cash=0;
+            }
         }
         
         public void encaisserGain(int gain){

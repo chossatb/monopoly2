@@ -151,7 +151,8 @@ public class Monopoly {
                                 int prixParMaison = Integer.parseInt(chance.get(i)[4]);
                                 carteschance.put(numero, new CartesChance(nom, numero, caseType, prixParMaison, prixParMaison));
                             }
-                            else if(caseType.compareTo("DE") == 0 || caseType.compareTo("LI") == 0 || caseType.compareTo("PR") == 0 ||caseType.compareTo("RE") == 0){
+                            else if(caseType.compareTo("DE") == 0 || caseType.compareTo("LI") == 0 || caseType.compareTo("PR") == 0 || caseType.compareTo("RE") == 0 ||
+                                    caseType.compareTo("HM") == 0 || caseType.compareTo("GL") == 0 || caseType.compareTo("RP") == 0 || caseType.compareTo("BV") == 0){
                                 carteschance.put(numero, new CartesChance(nom, numero, caseType));
                             }
                             else{
@@ -171,7 +172,7 @@ public class Monopoly {
                                 int prixGain = Integer.parseInt(caisse.get(i)[3]);
                                 cartescaisse.put(numero, new CartesCaisseDeCommunaute(nom, numero, caseType, prixGain));
                             }
-                            else if(caseType.compareTo("DE") == 0 || caseType.compareTo("LI") == 0 || caseType.compareTo("PR") == 0){
+                            else if(caseType.compareTo("DE") == 0 || caseType.compareTo("LI") == 0 || caseType.compareTo("PR") == 0 || caseType.compareTo("BE") == 0){
                                 cartescaisse.put(numero, new CartesCaisseDeCommunaute(nom, numero, caseType));
                             }
                             else{

@@ -48,7 +48,7 @@ public class IHM_achat_maison extends JFrame{
             comb_choix.addItem("Aucune");
             
             for (ProprieteAConstruire p : j.getPropietes_a_construire()) {
-                if (p.getNbMaison() != 4){
+                if (p.getNbMaison()!= 4){
                     comb_choix.addItem(p.getNomCarreau());
                 }
             }
@@ -61,7 +61,8 @@ public class IHM_achat_maison extends JFrame{
             });
             
             JButton but_annuler = new JButton("Annuler");
-            but_acheter.addActionListener((ActionEvent e) -> {
+            but_annuler.addActionListener((ActionEvent e) -> {
+                this.setVisible(false);
             });
             
             this.add(new JLabel("Sur quelle propriété voulez vous acheter la maison ?"), BorderLayout.NORTH);

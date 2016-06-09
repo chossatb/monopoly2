@@ -17,6 +17,7 @@ public class Message {
         ACHETER_OU_PAS,
         ACHAT_PROPRIETE,
         PASSER,
+        PASASSEZARGENT,
         CARTE_AMENDE,
         CARTE_MAISON_HOTEL,
         CARTE_GAIN,

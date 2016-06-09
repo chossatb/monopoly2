@@ -124,10 +124,13 @@ public class IHM_Jeu extends JFrame{
                 but_joueurSuivant.setMaximumSize(new Dimension(Integer.MAX_VALUE, but_Demarrer.getMinimumSize().height+10));
                 
                 but_lancerDes.addActionListener((ActionEvent e) -> {
-                    controleur.lancerDesAvancer(joueurCourant);
-                    but_lancerDes.setEnabled(false);
-                    but_joueurSuivant.setEnabled(true);
-                    controleur.jouerUnCoup(joueurCourant);
+                    boolean test = false;
+                    test = controleur.jouerUnCoup(joueurCourant, controleur.lancerDesAvancer(joueurCourant));
+                    if (!test){ //si le joueur n'a pas fait de double
+                       but_lancerDes.setEnabled(false);
+                       but_joueurSuivant.setEnabled(true); 
+                    }
+                    
                     this.display(controleur);
                 });
                 
@@ -173,6 +176,7 @@ public class IHM_Jeu extends JFrame{
                  tab_nomJ = new TitledBorder[controleur.getMonopoly().getJoueurs().size()];
                  
                  
+                 
                  joueurCourant = controleur.getMonopoly().getJoueurs().get(0);
                  
                  //Initialisation des Labels info_joueurs
@@ -184,6 +188,9 @@ public class IHM_Jeu extends JFrame{
                      pan_joueur.setBorder(tab_nomJ[i]);
                      pan_joueur.add(new JLabel("Case actuelle : "));
                      pan_joueur.add(tab_caseActuelle[i]);
+//                     pan_joueur.add(new JLabel("Propriétaire de la case :"));
+//                     pan_joueur.add(new JLabel(controleur.getMonopoly().getCarreau(joueurCourant.getPosCourante())))
+                     
                      pan_joueur.add(new JLabel("Argent : "));
                      pan_joueur.add(tab_argent[i]);
                      pan_CN.add(pan_joueur);
@@ -305,11 +312,17 @@ public class IHM_Jeu extends JFrame{
         
         public void joueurSupprime(String nom){ 
             JOptionPane.showMessageDialog(this, "Le joueur " + nom + " a perdu.");    
-            System.err.println("Le joueur " + nom + " supprimé !");
+            System.err.println("Le joueur "  + nom + " supprimé !");
+        }
+        
+         public void pasArgent(){ 
+            JOptionPane.showMessageDialog(this, "Vous n'avez pas assez d'argent pour cette case : \n" + "Achat impossible.");    
         }
         
         public void joueurAGagne(String nom){
             but_Demarrer.setEnabled(false);
+            but_joueurSuivant.setEnabled(false);
+            but_lancerDes.setEnabled(false);
             JOptionPane.showMessageDialog(this, "Le joueur " + nom + " a gagné.");
             System.out.println("Le joueur " + nom + " a gagné !");
         }
@@ -345,6 +358,66 @@ public class IHM_Jeu extends JFrame{
         
         public void passer(){
             JOptionPane.showMessageDialog(this, "Achat refusé.");
+        }
+        
+        public void carteAllezPrison(){
+            JOptionPane.showMessageDialog(this, "Allez en prison. Avancez tout droit en prison. Ne passez pas par la case Départ. Ne recevez pas 200€");
+        }
+        
+        public void carteDepart(){
+            JOptionPane.showMessageDialog(this, "Avancez jusqu'àla case Départ");
+        }
+        
+        public void carteAvenueHenriMartin(){
+            JOptionPane.showMessageDialog(this, "Rendez-vous à l'Avenue Henri-Martin. Si vous passez par la case départ, recevez 200€");
+        }
+        
+        public void carteGareDeLyon(){
+            JOptionPane.showMessageDialog(this, "Allez à la gare de Lyon. Si vous passez par la case départ, recevez 200€");
+        }
+        
+        public void carteBoulevardDeLaVilette(){
+            JOptionPane.showMessageDialog(this, "Accédez au Boulevard de la Vilette. Si vous passez par la case départ, recevez 200€");
+        }
+        
+        public void carteRueDeLaPaix(){
+            JOptionPane.showMessageDialog(this, "Rendez-vous à la Rue de la Paix");
+        }
+        
+        public void carteLibere(){
+            JOptionPane.showMessageDialog(this, "Vous êtes libéré de prison. Cette carte peut être conservée jusqu'à ce qu'elle soit utilisée.");
+        }
+        
+        public void carteReculer(){
+            JOptionPane.showMessageDialog(this, "Reculez de trois cases");
+        }
+        
+        public void carteBelleville(){
+            JOptionPane.showMessageDialog(this, "Retournez à Belleville");
+        }
+        
+        public void carteAnniversaire(){
+            JOptionPane.showMessageDialog(this, "C'est votre anniversaire. Chaque joueur doit vous donner 10€");
+        }
+        
+        public void carteAmende(CartesChance c){    //Récupérer le prix de l'amende de la carte chance
+            JOptionPane.showMessageDialog(this, "Payez une amende de : " + c.getPrix());
+        }
+        
+        public void carteAmende(CartesCaisseDeCommunaute c){    //Récupérer le prix de l'amende de la carte caisse de communaute
+            JOptionPane.showMessageDialog(this, "Payez une amende de : " + c.getPrix());
+        }
+        
+        public void carteGain(CartesChance c){ //Récupérer le prix du gain de la carte chance
+            JOptionPane.showMessageDialog(this, "Vous recevez une somme de : " + c.getPrix());
+        }
+        
+        public void carteGain(CartesCaisseDeCommunaute c){ //Récupérer le prix du gain de la carte caisse de communaute
+            JOptionPane.showMessageDialog(this, "Vous recevez une somme de : " + c.getPrix());
+        }
+        
+        public void carteMaisonHotel(CartesChance ch){
+            JOptionPane.showMessageDialog(this, "Faites des réparations : versez pour chaque maison " + ch.getPrixParMaison() + "€ pour chaque hôtel " + ch.getPrixParHotel() + "€");
         }
 
         
